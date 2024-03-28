@@ -1,0 +1,197 @@
+Promise-structure
+
+			const result = new Promise((resolve, reject) => { //!!!
+			  let interval = setInterval(() => {
+                 //...
+			  }, 50);
+			});  
+	  
+			result
+			  .then(value => {
+				console.log(result);
+				console.log(value);
+	  
+                //...        
+			  })
+			  .catch(value => {
+				console.log(result);
+				console.error(value);
+			  });		
+
+
+---
+new api.js
+
+export let resultAPI = null; //!!![] or {}
+
+export function fetchData(API) {
+    fetch(API)
+    .then(responce => {
+        return responce.json();
+    })
+    .then(data => {
+        console.log(data); //!!!result or not
+
+        resultAPI = data;
+    });
+}
+
+
+---
+list.js
+
+import {fetchData, resultAPI} from './api' //!!!
+
+	getAPI() {
+        let self = this;
+
+		if (! localStorage.users || ! JSON.parse(localStorage.users).length) {
+		/*	
+			fetch(this.state.API)
+            ...
+        */ 
+
+			fetchData(this.state.API); //!!!
+
+			//console.log(resultAPI); //!!!no data
+
+			const result = new Promise((resolve, reject) => { //!!!
+			  let interval = setInterval(() => {
+                 //...
+			  }, 50);
+			});  
+	  
+			result
+			  .then(value => {
+				console.log(result);
+				console.log(value);
+	  
+                //...        
+			  })
+			  .catch(value => {
+				console.log(result);
+				console.error(value);
+			  });		
+
+		} else {
+
+...then
+			const result = new Promise((resolve, reject) => { //!!!
+			  let interval = setInterval(() => {
+				 if (resultAPI && resultAPI.results && resultAPI.results.length) { //!!!results
+					resolve(resultAPI.results);
+					clearInterval(interval);
+				 }
+			  }, 50);
+			});  
+	  
+			result
+			  .then(value => {
+				console.log(result);
+				console.log(value);
+	  
+				value.map((user, index) => { 
+				  user.indexOriginal = index;
+				});
+	  
+				localStorage.users = JSON.stringify(value);
+		  
+				this.handleUsers(value);        
+			  })
+			  .catch(value => {
+				console.log(result);
+				console.error(value);
+			  });		
+
+
+---
+user.js
+
+import {fetchData, resultAPI} from './api' //!!!
+
+	getUrl() {
+		let user = JSON.parse(localStorage.users).filter((user) => user.indexOriginal == this.state.userId);
+
+        console.log(user);
+
+        this.setState({
+			url: user[0].url,	
+		 });	
+
+		 fetchData(user[0].url); //!!!пока только это, чтобы посмотреть структуру ответа
+
+...then
+
+		 const result = new Promise((resolve, reject) => {
+		   let interval = setInterval(() => {
+              //...
+		   }, 50);
+		 });  
+   
+		 result
+		   .then(value => {
+			 console.log(result);
+			 console.log(value);
+   
+             //...			
+		   })
+		   .catch(value => {
+			 console.log(result);
+			 console.error(value);
+		   });				 
+
+...then
+
+       this.state = {
+          userId: null,
+		  userName: null,
+
+          url: null,
+
+		  front_default: '', //!!!
+		};
+
+...
+
+		 const result = new Promise((resolve, reject) => {
+		   let interval = setInterval(() => {
+			  if (resultAPI && Object.keys(resultAPI.sprites).length) { //!!!not results - obj -> .sprites
+				 resolve(resultAPI.sprites);
+				 clearInterval(interval);
+			  }
+		   }, 50);
+		 });  
+   
+		 result
+		   .then(value => {
+			 console.log(result);
+			 console.log(value);
+   
+			 this.setState({
+				front_default: value.front_default,	//!!!
+			 });				
+		   })
+		   .catch(value => {
+			 console.log(result);
+			 console.error(value);
+		   });						
+
+...
+
+			<div>
+			   <Link to="/">back</Link>		
+               <h3>{this.state.userName}</h3>
+			   <h5><a href={this.state.url}>{this.state.url}</a></h5>
+			   <div><img src={this.state.front_default} className="poke_img"/></div>
+			   <button className="btn btn-link" onClick={() => this.makeRemove(this.state.userId)}>remove</button>
+			</div>
+
++
+
+styles/style.css
+
+.poke_img {
+    width: 150px;    
+ }
+
+--- FIREBASE - create account...
